@@ -1,6 +1,8 @@
-import {Alert, Button, Card, CardContent, Checkbox, FormControlLabel, TextField} from "@mui/material";
+import {Button, Card, CardContent, Checkbox, FormControlLabel, TextField} from "@mui/material";
 import Box from "@mui/material/Box";
 import {useEffect, useState} from "react";
+import {useFormik} from "formik";
+import * as Yup from 'yup';
 
 const users = [
     {
@@ -15,6 +17,14 @@ const users = [
     }
 ]
 
+const validateLogin = Yup.object({
+    password: Yup.string()
+        .min(8, 'Must be 8 characters or more')
+        .max(32, 'Must be 32 characters or less')
+        .required('Required'),
+    email: Yup.string().email('Invalid email address').required('Required'),
+})
+
 export default function Login() {
     const [formData, setFormData] = useState({
         email: "",
@@ -22,74 +32,62 @@ export default function Login() {
         isRememberMe: false
     });
 
-    const [invalid, setInvalid] = useState(false)
+    const formik = useFormik({
+        initialValues: formData,
+        validationSchema: validateLogin,
+        onSubmit: values => {
+            console.log(values)
+        },
+    });
 
-    const [errorMess, setErrorMess] = useState("");
-
-    useEffect(() => {
-        console.log('xin chao')
-    }, [])
-
-    useEffect(() => {
-        console.log('Toi thich ban')
-    }, [errorMess])
-
-
-    const handleChange = (e) => {
-        if (e.target.name == 'email') {
-            let email = e.target.value;
-            let pattern = /^[a-zA-Z]+\@+[a-z]+\.+(com|vn)$/;
-            if (!pattern.test(email)) {
-                setInvalid(true)
-            } else {
-                setInvalid(false)
-            }
-        }
-        setFormData({...formData, [e.target.name]: e.target.value})
-    }
-
-    const handleCheckedRemember = () => {
-        setFormData({...formData, isRememberMe: !formData.isRememberMe})
-    }
 
     const handleSubmit = () => {
-        const {email, password} = formData
-        const userLogin = users.find(user => user.email === email && user.password === password);
-        if (!userLogin) {
-            setErrorMess("Account not exist")
-        } else {
-            localStorage.setItem('user', userLogin.email)
-            setErrorMess("")
-        }
+        formik.handleSubmit();
     }
-
 
     return (
         <>
             <Box
                 component="form"
                 sx={{
-                    '& .MuiTextField-root': { m: 1, width: '25ch' },
+                    '& .MuiTextField-root': {m: 1, width: '25ch'},
                 }}
                 noValidate
                 autoComplete="off"
+                onSubmit={formik.handleSubmit}
             >
-                <Card sx={{ maxWidth: 300 }}>
+                <Card sx={{maxWidth: 300}}>
                     <CardContent>
-                        <h2 style={{ textAlign: 'center'}}>Login Form</h2>
-                        { errorMess && <Alert severity="error">{errorMess}!</Alert>}
+                        <h2 style={{textAlign: 'center'}}>Login Form</h2>
                         <div>
-                            <TextField  error={invalid}  name="email" value={formData.email} onChange={handleChange} id="email" label="Email" variant="outlined" />
-                            {invalid && <p style={{color: 'red'}}>Email invalid</p>}
+                            <TextField error={!!formik.errors.email}
+                                       name="email"
+                                       value={formik.values.email}
+                                       onChange={formik.handleChange}
+                                       id="email"
+                                       label="Email"
+                                       variant="outlined"
+                                       helperText={formik.errors.email}
+                            />
+
                         </div>
                         <div>
-                            <TextField name="password" value={formData.password} onChange={handleChange} id="password" label="Password" variant="outlined" />
+                            <TextField error={!!formik.errors.password}
+                                       name="password"
+                                       value={formik.values.password}
+                                       onChange={formik.handleChange}
+                                       id="password"
+                                       label="Password"
+                                       variant="outlined" type="password"
+                                       helperText={formik.errors.password}/>
                         </div>
-                        <div style={{ textAlign: 'center' }}>
-                            <FormControlLabel control={<Checkbox checked={formData.isRememberMe} name="isRememberMe" onChange={handleCheckedRemember} />} label="Remember me" />
+                        <div style={{textAlign: 'center'}}>
+                            <FormControlLabel
+                                control={<Checkbox checked={formik.values.isRememberMe} name="isRememberMe"
+                                                   onChange={formik.handleChange}/>} label="Remember me"/>
                         </div>
-                        <div style={{ textAlign: 'center' }}>
-                            <Button variant="contained" onClick={handleSubmit}>Login</Button>
+                        <div style={{textAlign: 'center'}}>
+                            <Button variant="contained" type="submit">Login</Button>
                         </div>
                     </CardContent>
                 </Card>
