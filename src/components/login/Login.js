@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import {useEffect, useState} from "react";
 import {useFormik} from "formik";
 import * as Yup from 'yup';
+import {useNavigate} from "react-router-dom";
 
 const users = [
     {
@@ -31,12 +32,15 @@ export default function Login() {
         password: "",
         isRememberMe: false
     });
+    const navigate = useNavigate();
 
     const formik = useFormik({
         initialValues: formData,
         validationSchema: validateLogin,
         onSubmit: values => {
-            console.log(values)
+            console.log(values);
+            // chuyen trang
+            navigate('/users')
         },
     });
 

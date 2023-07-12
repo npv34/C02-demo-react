@@ -3,6 +3,7 @@ import {useEffect, useState} from "react";
 import {LinearProgress} from "@mui/material";
 import Image from 'react-bootstrap/Image';
 import {findUserByUserName, getUserAPI} from "../../service/api.service"
+import {Link} from "react-router-dom";
 
 function UserList() {
     const [users, setUser] = useState([]);
@@ -69,7 +70,9 @@ function UserList() {
                                 <Image width="50" src={user.avatar_url} roundedCircle />
                             </td>
                             <td><a target="_blank" href={user.html_url}>{user.html_url}</a></td>
-                            <td>@mdo</td>
+                            <td>
+                                <Link to={`/users/${user.id}`}>Detail</Link>
+                            </td>
                         </tr>
                     ))}
                     </tbody>

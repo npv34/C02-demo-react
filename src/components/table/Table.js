@@ -1,24 +1,25 @@
 import {useState} from "react";
+import {useFormik} from "formik";
 
 let data = [
     {
         id: 1,
         name: "nam",
-        email: "nam@gmail.com",
+        email: "nam1@gmail.com",
         phone: "123-456-0900",
         role: 1,
     },
     {
         id: 2,
         name: "nam",
-        email: "nam@gmail.com",
+        email: "nam2@gmail.com",
         phone: "123-456-4324",
         role : 2
     },
     {
         id: 3,
         name: "nam",
-        email: "nam@gmail.com",
+        email: "nam3@gmail.com",
         phone: "123-456-4324",
         role : 3
     },
@@ -32,7 +33,7 @@ let data = [
     {
         id: 5,
         name: "nam1",
-        email: "nam1@gmail.com",
+        email: "nam12@gmail.com",
         phone: "123-456-4324",
         role : 2
     }
@@ -47,6 +48,20 @@ function Table() {
         email: "",
         phone: "",
     });
+
+    const formAdd = useFormik({
+        initialValues: form,
+        onSubmit: (values, {resetForm}) => {
+            const indexItem = users.findIndex(item => item.email == values.email);
+            if (indexItem == -1) {
+                setUsers([...users, values])
+            } else {
+                users[indexItem] = values;
+                setUsers([...users])
+            }
+            resetForm();
+        }
+    })
 
     const deleteUser = (id) => {
          if (!window.confirm("Are you sure you want to delete this user")) {
@@ -71,33 +86,35 @@ function Table() {
         setChecked(!checked)
     }
 
-    const addUser = (e) => {
-        e.preventDefault();
-        setUsers([...users, form])
+    const handleEdit = (index) => {
+        let currentUser = users[index];
+        formAdd.setValues(currentUser)
     }
-
-    const handleChange = (e) => {
-        let property = e.target.name;
-        setForm({...form, [property]: e.target.value})
-    }
-
-
 
     return (
         <>
             <h2>
                 {title}
             </h2>
-            <input type="text" onChange={searchUser}/>
-            <form onSubmit={addUser}>
-                name: <input type="text" name="name" onChange={handleChange}/>
+            <form onSubmit={formAdd.handleSubmit}>
+                name: <input type="text"
+                             name="name"
+                             value={formAdd.values.name}
+                             onChange={formAdd.handleChange}/>
                 <br/>
-                email: <input type="email" name="email" onChange={handleChange}/>
+                email: <input type="email"
+                              value={formAdd.values.email}
+                              name="email" onChange={formAdd.handleChange}/>
                 <br/>
-                phone: <input type="text" name="phone" onChange={handleChange}/>
+                phone: <input type="text"
+                              value={formAdd.values.phone}
+                              name="phone"
+                              onChange={formAdd.handleChange}/>
                 <br/>
                 <button type="submit">add</button>
             </form>
+            Search: <input type="text" onChange={searchUser}/>
+
             <table>
                 <tr>
                     <td><input type="checkbox" onChange={checkedAll}/></td>
@@ -126,6 +143,7 @@ function Table() {
                             <td>{ user.phone }</td>
                             <td>{ role }</td>
                             <td>
+                                <button onClick={() => handleEdit(index)}>Edit</button>
                                 <button onClick={() => deleteUser(user.id)}>Delete</button>
                             </td>
                         </tr>
